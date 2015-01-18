@@ -1,18 +1,59 @@
 package networking;
 
 import java.net.*;
+import java.util.ArrayList;
 import java.io.*;
 
 public class ChatServer extends Thread
 {
-	private ServerSocket serverSocket;
+	   static ServerSocket serverSocket;
+	   static int port = 3389;
+	   static Socket[] users;
+	   static int numberOfUsers = 0;
 	   
 	   public ChatServer(int port) throws IOException
 	   {
 	      serverSocket = new ServerSocket(port);
 	      serverSocket.setSoTimeout(10000);
+	      users = new Socket[4];
 	   }
-
+	   
+	   public static void main(String [] args)
+	   {
+	      //int port = 3389;
+	      try
+	      {
+	         Thread t = new ChatServer(port);
+	         t.start();
+	      }catch(IOException e)
+	      {
+	         e.printStackTrace();
+	      }
+	   }
+	   
+}
+class ClientWaitingThread extends Thread
+{
+	public void run()
+	{
+		System.out.println("Client waiting thread started - waiting for clients...");
+		while(true)
+		{
+			try
+			{
+				Socket server = ChatServer.serverSocket.accept();
+				ChatServer.users[ChatServer.numberOfUsers] = server;
+				ChatServer.numberOfUsers++;
+			}
+			catch (IOException e)
+			{
+				
+			}
+		}
+	}
+}
+class ServerThread extends Thread
+{
 	   public void run()
 	   {
 	      while(true)
@@ -20,8 +61,8 @@ public class ChatServer extends Thread
 	         try
 	         {
 	            System.out.println("Waiting for client on port " +
-	            serverSocket.getLocalPort() + "...");
-	            Socket server = serverSocket.accept();
+	            ChatServer.serverSocket.getLocalPort() + "...");
+	            Socket server = ChatServer.serverSocket.accept();
 	            System.out.println("Just connected to "
 	                  + server.getRemoteSocketAddress());
 	            DataInputStream in =
@@ -41,18 +82,6 @@ public class ChatServer extends Thread
 	            e.printStackTrace();
 	            break;
 	         }
-	      }
-	   }
-	   public static void main(String [] args)
-	   {
-	      int port = 3389;
-	      try
-	      {
-	         Thread t = new ChatServer(port);
-	         t.start();
-	      }catch(IOException e)
-	      {
-	         e.printStackTrace();
 	      }
 	   }
 }
