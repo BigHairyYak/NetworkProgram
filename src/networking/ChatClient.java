@@ -2,38 +2,91 @@ package networking;
 
 import java.net.*;
 import java.util.Scanner;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.io.*;
 
 public class ChatClient
 {
-	static Scanner systemReader;
-	public static void main(String[] args)
-	{
-		systemReader = new Scanner(System.in);
-		System.out.println("Enter an IP to connect to with YakChat!");
-	    String serverName = (new Scanner(System.in)).next();
-	    int port = 3389;
-	    try
-	      {
-	         System.out.println("Connecting to " + serverName
-	                             + " on port " + port);
-	         Socket client = new Socket(serverName, port);
-	         System.out.println("Just connected to "
-	                      + client.getRemoteSocketAddress());
-	         OutputStream outToServer = client.getOutputStream();
-	         DataOutputStream out =
-	                       new DataOutputStream(outToServer);
+	static Scanner clientReader;
+    String messageToServer;
+    static DataOutputStream outToServer;
+    static ChatBox chat;
 
-	         out.writeUTF("Hello from "
-	                      + client.getLocalSocketAddress());
-	         InputStream inFromServer = client.getInputStream();
-	         DataInputStream in =
-	                        new DataInputStream(inFromServer);
-	         System.out.println("Server says " + in.readUTF());
-	         //client.close();
-	      }catch(IOException e)
-	      {
-	         e.printStackTrace();
-	      }
+    	   	    
+    public static void main(String[] args)
+	{
+    	chat = new ChatBox("");
+    	System.out.println("Chat Client started");
+    	
+ 		clientReader = new Scanner(System.in);
+		DataInputStream in;
+		Thread inputThread, outputThread;
+	    boolean connected = false;
+	    int port = 3389;
+
+	    while (connected == false)
+	    {
+	    	try
+	    	{
+	    		try
+	    		{
+	    			System.out.println("Enter an IP to connect to with YakChat!");
+	    		    String serverName = clientReader.next();
+	    		    
+	    		    System.out.println("Connecting to " + serverName + " on port " + port);
+	    		    
+	    			Socket client = new Socket(serverName, port);
+
+	    			System.out.println("Just connected to "
+	    					+ client.getRemoteSocketAddress());
+  			
+	    			connected = true;  			
+	    			
+	    			final InputStream inFromServer = client.getInputStream();
+	    			final OutputStream out = client.getOutputStream();
+
+	    			outToServer = new DataOutputStream(out);
+	    				    			
+	    			inputThread = new Thread(
+	    				new Runnable()
+	    				{
+	    					String inFeed = "";	    					
+	    					DataInputStream in = new DataInputStream(inFromServer);
+							public void run() 
+							{
+								while (true)
+								{
+									try
+									{
+										inFeed = in.readUTF();
+										System.out.println("Server says " + inFeed);
+										((ChatInputPanel)chat.CP).ChatRecord.add(inFeed);
+										((ChatInputPanel)chat.CP).repaint();
+									} 
+									catch (IOException e) 
+									{
+										e.printStackTrace();
+									}
+									if (inFeed != "")
+										System.out.println(inFeed);
+								}
+							}
+	    				}
+	    			);
+	    			inputThread.start();
+	    			
+	    		}
+	    		
+	    		catch (ConnectException E)
+	    		{
+	    			System.out.println("Nope");
+	    		}	    		
+	    	}
+	    	catch(IOException e)
+	    	{
+	    		e.printStackTrace();
+	    	}
+	    }
 	}
-}
+	}
