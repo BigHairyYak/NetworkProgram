@@ -6,6 +6,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Scanner;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -55,6 +56,23 @@ public class ChatBox extends JFrame implements KeyListener
 				
 			}
 		}
+		else if (keycode == KeyEvent.VK_SPACE)
+		{
+			nextMessage += " ";
+		}
+		else if (keycode == KeyEvent.VK_SHIFT)
+		{
+			
+		}
+		else if (keycode == KeyEvent.VK_BACK_SPACE)
+		{
+			if (nextMessage.length() > 0)
+			{
+				nextMessage = nextMessage.substring(0, nextMessage.length()-1);
+				((ChatInputPanel)CP).message = nextMessage;
+				CP.repaint();
+			}
+		}
 		else
 		{
 			nextMessage += KeyEvent.getKeyText(keycode);
@@ -70,7 +88,7 @@ public class ChatBox extends JFrame implements KeyListener
 
 class ChatPanel extends JPanel
 {
-	String chatTitle = "Client Server";
+	String chatTitle = "Chat Server";
 	ArrayList<String> ChatRecord;
 	public ChatPanel()
 	{
@@ -100,7 +118,8 @@ class ChatPanel extends JPanel
 
 class ChatInputPanel extends ChatPanel
 {
-	String chatTitle = "Client Program - ";
+	Scanner messageScanner;
+	String chatTitle = "Chat Client Program - ";
 	ArrayList<String> ChatRecord;
 	String message = "";
 	public ChatInputPanel()
@@ -126,8 +145,20 @@ class ChatInputPanel extends ChatPanel
 		G.drawLine(0, 90, 750, 90);
 		for (int q = 0; q < ChatRecord.size(); q++)
 		{
-			G.drawString(ChatRecord.get(q), 5, (q * 15) + 105);
+			messageScanner = new Scanner(ChatRecord.get(q));
+			messageScanner.useDelimiter(": ");
+			G.setColor(Color.GREEN);
+			String clientname = messageScanner.next();
+			G.drawString(clientname, 5, (q * 15) + 105);
+			if (messageScanner.hasNext())
+			{
+				G.drawString(": ", (G.getFontMetrics().stringWidth(clientname)) + 5, (q * 15) + 105);
+				G.setColor(Color.WHITE); 
+				G.drawString(messageScanner.next(), (G.getFontMetrics().stringWidth(clientname + ": ")) + 10, (q * 15) + 105);
+				//G.drawString(ChatRecord.get(q), 5, (q*15) + 105);
+			}
 		}
+		G.setColor(Color.GREEN);
 		G.drawLine(0, 735, 400, 735);
 		G.drawString(message, 5, 750);
 	}

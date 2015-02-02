@@ -23,7 +23,7 @@ public class ChatClient
 		DataInputStream in;
 		Thread inputThread, outputThread;
 	    boolean connected = false;
-	    int port = 3389;
+	    int port = 443;
 
 	    while (connected == false)
 	    {
@@ -33,6 +33,9 @@ public class ChatClient
 	    		{
 	    			System.out.println("Enter an IP to connect to with YakChat!");
 	    		    String serverName = clientReader.next();
+	    		    
+	    		    System.out.println("Enter your first username!");
+	    		    String username = clientReader.next();
 	    		    
 	    		    System.out.println("Connecting to " + serverName + " on port " + port);
 	    		    
@@ -48,6 +51,8 @@ public class ChatClient
 
 	    			outToServer = new DataOutputStream(out);
 	    				    			
+	    			outToServer.writeUTF("!@connect " + username);
+	    			
 	    			inputThread = new Thread(
 	    				new Runnable()
 	    				{
@@ -60,7 +65,7 @@ public class ChatClient
 									try
 									{
 										inFeed = in.readUTF();
-										System.out.println("Server says " + inFeed);
+										//System.out.println("Server says " + inFeed);
 										((ChatInputPanel)chat.CP).ChatRecord.add(inFeed);
 										((ChatInputPanel)chat.CP).repaint();
 									} 
