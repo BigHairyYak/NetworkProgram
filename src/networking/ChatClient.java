@@ -16,6 +16,8 @@ public class ChatClient
     	   	    
     public static void main(String[] args)
 	{
+    	System.setProperty("javax.net.ssl.trustStore", "truststoreCA.jks");
+    	
     	chat = new ChatBox("");
     	System.out.println("Chat Client started");
     	
@@ -23,7 +25,7 @@ public class ChatClient
 		DataInputStream in;
 		Thread inputThread, outputThread;
 	    boolean connected = false;
-	    int port = 443;
+	    int port = 56777;
 
 	    while (connected == false)
 	    {
